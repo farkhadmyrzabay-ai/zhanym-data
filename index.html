@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Выбери свидание</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Onest:wght@400;500;600&family=Unbounded:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: четыре экрана подряд (приветствие, место, дата и время, итог). На каждом свои персонажи: Росток и Звёздочка. */
+:root {
+  --bg: #F7F2F6;
+  --surface: #FFFFFF;
+  --ink: #2A1E2C;
+  --muted: #6E6275;
+  --line: #E6DCE8;
+  --accent: #C2305A;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #FBE4EC;
+  --ok: #1E6B5E;
+  --c1: #BFE8D6;
+  --c2: #FFD3C2;
+  --leaf: #7BC8A4;
+  --star: #FFC94D;
+  --blush: #FF9DB5;
+  --outline: #4A3550;
+  --font-display: "Unbounded", "Onest", system-ui, sans-serif;
+  --font-body: "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-hand: "Caveat", "Segoe Script", cursive;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #171218;
+    --surface: #231A25;
+    --ink: #F5EDF6;
+    --muted: #B8AABF;
+    --line: #3A303D;
+    --accent: #FF7B9C;
+    --accent-ink: #2A0E17;
+    --accent-soft: #3B2331;
+    --ok: #6FD3BE;
+    --c1: #4B8F78;
+    --c2: #C9735D;
+    --leaf: #8EE0B8;
+    --star: #FFD36B;
+    --blush: #FF8FAE;
+    --outline: #1B1220;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #171218;
+  --surface: #231A25;
+  --ink: #F5EDF6;
+  --muted: #B8AABF;
+  --line: #3A303D;
+  --accent: #FF7B9C;
+  --accent-ink: #2A0E17;
+  --accent-soft: #3B2331;
+  --ok: #6FD3BE;
+  --c1: #4B8F78;
+  --c2: #C9735D;
+  --leaf: #8EE0B8;
+  --star: #FFD36B;
+  --blush: #FF8FAE;
+  --outline: #1B1220;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.45;
+}
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Рисунки */
+.chr-body { fill: var(--c1); }
+.chr-body2 { fill: var(--c2); }
+.leaf { fill: var(--leaf); }
+.starfill { fill: var(--star); }
+.line { fill: none; stroke: var(--outline); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.ol { stroke: var(--outline); stroke-width: 3; stroke-linejoin: round; }
+.eye { fill: var(--outline); }
+.shine { fill: #fff; }
+.blush { fill: var(--blush); opacity: 0.85; }
+.shadow { fill: var(--outline); opacity: 0.1; }
+.hot { fill: var(--accent); }
+.paper { fill: var(--surface); }
+.softfill { fill: var(--accent-soft); }
+
+.confetti { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.cf { position: absolute; fill: var(--accent); opacity: 0.16; }
+
+.wrap {
+  position: relative;
+  z-index: 1;
+  max-width: 560px;
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.hero { display: flex; flex-direction: column; gap: 6px; }
+.hand {
+  margin: 0;
+  font-family: var(--font-hand);
+  font-size: 1.7rem;
+  line-height: 1;
+  color: var(--accent);
+  transform: rotate(-2deg);
+  transform-origin: left center;
+}
+h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.7rem, 7.4vw, 2.4rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.hh { display: inline-block; width: 0.85em; height: 0.8em; margin-left: 0.2em; fill: var(--accent); vertical-align: -0.02em; }
+.lead { margin: 4px 0 0; color: var(--muted); max-width: 44ch; }
+
+.mini { display: block; width: min(100%, 300px); height: auto; margin: -6px auto -10px; }
+
+/* Первый экран */
+.welcome { padding-bottom: 240px; }
+.welcome .hero { padding-top: 12px; align-items: flex-start; }
+.welcome h1 { font-size: clamp(2.4rem, 12vw, 3.4rem); }
+.scene-fixed {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.scene-fixed svg { width: min(100%, 520px); height: auto; display: block; }
+.bob { animation: bob 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes bob { 50% { transform: translateY(-7px); } }
+
+.step { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+.sub {
+  margin: 4px 0 -4px;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.choice { position: relative; display: block; min-width: 0; }
+.choice input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.choice input:disabled { cursor: not-allowed; }
+.face {
+  display: block;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.choice input:focus-visible ~ .face { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.venues { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.venue .face {
+  position: relative;
+  min-height: 100%;
+  padding: 16px 48px 16px 16px;
+  border-radius: 16px;
+}
+.venue .face::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  top: 16px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--accent-ink);
+}
+.venue input:checked ~ .face { border-color: var(--accent); background: var(--accent-soft); }
+.venue input:checked ~ .face::after { content: "✓"; background: var(--accent); border-color: var(--accent); }
+.kind { display: block; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.vname { display: block; margin-top: 3px; font-family: var(--font-display); font-weight: 500; font-size: 1.05rem; overflow-wrap: anywhere; }
+.vmood { display: block; margin-top: 4px; font-size: 0.9rem; color: var(--muted); }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 0.9rem; font-weight: 500; }
+input[type="text"], textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+}
+textarea { resize: vertical; min-height: 84px; }
+input[type="text"]:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+::placeholder { color: var(--muted); opacity: 0.8; }
+
+.month { margin: -4px 0 0; color: var(--muted); font-size: 0.9rem; }
+.days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.day .face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 60px;
+  border-radius: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.wd { font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.we .wd { color: var(--accent); }
+.dn { font-size: 1.15rem; font-weight: 600; }
+.today .dn::after { content: ""; display: block; width: 4px; height: 4px; margin: 2px auto 0; border-radius: 50%; background: currentColor; }
+.day input:checked ~ .face { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.day input:checked ~ .face .wd { color: inherit; opacity: 0.85; }
+
+.times { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.time .face {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  border-radius: 10px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+.time input:checked ~ .face { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.time input:disabled ~ .face { opacity: 0.35; }
+
+.dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+}
+.dock-in {
+  max-width: 560px;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-top: 12px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+}
+.dock-text { flex: 1; min-width: 0; }
+.dock-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dock-when { font-size: 0.875rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border: 1.5px solid var(--accent);
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn.big { padding: 15px 26px; font-size: 1.05rem; }
+.btn.ghost { background: transparent; color: var(--accent); }
+.btn:disabled { background: var(--line); border-color: var(--line); color: var(--muted); cursor: not-allowed; }
+.btn:focus-visible, .link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.link {
+  align-self: flex-start;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ticket { position: relative; overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; }
+.ticket-main { padding: 20px 20px 18px; display: flex; flex-direction: column; gap: 14px; }
+.eyebrow { margin: 0; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+.t-place { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 1.35rem; line-height: 1.2; overflow-wrap: anywhere; text-wrap: balance; }
+.t-row { display: flex; flex-wrap: wrap; gap: 8px 28px; }
+.lbl { display: block; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.t-val { font-weight: 600; font-variant-numeric: tabular-nums; }
+.ticket-stub { position: relative; padding: 14px 20px 16px; border-top: 2px dashed var(--line); color: var(--muted); font-size: 0.9rem; }
+.ticket-stub::before, .ticket-stub::after { content: ""; position: absolute; top: -11px; width: 20px; height: 20px; border-radius: 50%; background: var(--bg); }
+.ticket-stub::before { left: -11px; }
+.ticket-stub::after { right: -11px; }
+.ticket-stub p { margin: 0; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.status { margin: 0; min-height: 1.4em; color: var(--ok); font-size: 0.9rem; }
+.fine { margin: 0; color: var(--muted); font-size: 0.85rem; }
+
+@media (max-width: 420px) {
+  .days { gap: 4px; }
+  .times { gap: 5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .face { transition: none; }
+  .bob { animation: none; }
+}
+</style>
+
+</head>
+<body>
+<!-- Персонажи и мелочи: Росток (мятный) и Звёздочка (персиковая) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="sprout" viewBox="0 -6 160 166">
+      <ellipse class="shadow" cx="80" cy="152" rx="50" ry="7"/>
+      <ellipse class="chr-body ol" cx="58" cy="142" rx="16" ry="9"/>
+      <ellipse class="chr-body ol" cx="102" cy="142" rx="16" ry="9"/>
+      <ellipse class="chr-body ol" cx="26" cy="98" rx="12" ry="8" transform="rotate(-25 26 98)"/>
+      <ellipse class="chr-body ol" cx="134" cy="98" rx="12" ry="8" transform="rotate(25 134 98)"/>
+      <ellipse class="chr-body ol" cx="80" cy="88" rx="56" ry="54"/>
+      <path class="line" d="M80 36 C80 26 80 20 82 14"/>
+      <path class="leaf ol" d="M82 14 C70 4 58 8 56 18 C68 24 77 21 82 14Z"/>
+      <path class="leaf ol" d="M82 14 C94 2 108 6 110 16 C98 24 88 21 82 14Z"/>
+      <circle class="eye" cx="60" cy="84" r="5.5"/>
+      <circle class="eye" cx="100" cy="84" r="5.5"/>
+      <circle class="shine" cx="61.8" cy="82" r="1.8"/>
+      <circle class="shine" cx="101.8" cy="82" r="1.8"/>
+      <ellipse class="blush" cx="45" cy="100" rx="9" ry="6"/>
+      <ellipse class="blush" cx="115" cy="100" rx="9" ry="6"/>
+      <path class="line" d="M72 97 Q80 106 88 97"/>
+    </symbol>
+    <symbol id="star" viewBox="0 -6 160 166">
+      <ellipse class="shadow" cx="80" cy="152" rx="50" ry="7"/>
+      <ellipse class="chr-body2 ol" cx="58" cy="142" rx="16" ry="9"/>
+      <ellipse class="chr-body2 ol" cx="102" cy="142" rx="16" ry="9"/>
+      <ellipse class="chr-body2 ol" cx="26" cy="98" rx="12" ry="8" transform="rotate(-25 26 98)"/>
+      <ellipse class="chr-body2 ol" cx="134" cy="98" rx="12" ry="8" transform="rotate(25 134 98)"/>
+      <ellipse class="chr-body2 ol" cx="80" cy="88" rx="56" ry="54"/>
+      <path class="line" d="M80 36 L80 18"/>
+      <polygon class="starfill ol" points="80,-4 83.5,5.5 93.5,6 85.7,12.3 88.4,22 80,16.5 71.6,22 74.3,12.3 66.5,6 76.5,5.5"/>
+      <path class="line" d="M53 86 Q60 77 67 86"/>
+      <path class="line" d="M93 86 Q100 77 107 86"/>
+      <ellipse class="blush" cx="45" cy="100" rx="9" ry="6"/>
+      <ellipse class="blush" cx="115" cy="100" rx="9" ry="6"/>
+      <ellipse class="eye" cx="80" cy="100" rx="6" ry="5"/>
+    </symbol>
+    <symbol id="heart" viewBox="0 0 32 30">
+      <path d="M16 29 C4 20 0 14 0 8 C0 3 4 0 8.5 0 C12 0 14.5 2 16 5 C17.5 2 20 0 23.5 0 C28 0 32 3 32 8 C32 14 28 20 16 29Z"/>
+    </symbol>
+    <symbol id="spark" viewBox="0 0 16 16">
+      <path d="M8 0 L10 6 L16 8 L10 10 L8 16 L6 10 L0 8 L6 6Z"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="confetti" aria-hidden="true">
+  <svg class="cf" style="left:7%;top:9%;width:22px" viewBox="0 0 32 30"><use href="#heart" width="32" height="30"/></svg>
+  <svg class="cf" style="right:9%;top:16%;width:16px" viewBox="0 0 32 30"><use href="#heart" width="32" height="30"/></svg>
+  <svg class="cf" style="left:14%;top:44%;width:14px" viewBox="0 0 16 16"><use href="#spark" width="16" height="16"/></svg>
+  <svg class="cf" style="right:6%;top:50%;width:24px" viewBox="0 0 32 30"><use href="#heart" width="32" height="30"/></svg>
+  <svg class="cf" style="left:5%;top:72%;width:18px" viewBox="0 0 32 30"><use href="#heart" width="32" height="30"/></svg>
+  <svg class="cf" style="right:12%;top:82%;width:14px" viewBox="0 0 16 16"><use href="#spark" width="16" height="16"/></svg>
+</div>
+
+<!-- Экран 1: приветствие -->
+<section class="wrap welcome" id="p1">
+  <header class="hero">
+    <p class="hand">привет</p>
+    <h1>Жаным<svg class="hh" viewBox="0 0 32 30" aria-hidden="true"><use href="#heart" width="32" height="30"/></svg></h1>
+    <p class="lead">У меня к тебе один вопрос: куда мы пойдём? Выбирай сама, это займёт минуту.</p>
+  </header>
+  <button class="btn big" id="start" type="button" style="align-self:flex-start">Давай выберем</button>
+  <div class="scene-fixed" aria-hidden="true">
+    <svg viewBox="0 0 400 240">
+      <use href="#sprout" x="10" y="64" width="160" height="166" transform="rotate(-5 90 230)"/>
+      <use href="#star" x="230" y="64" width="160" height="166" transform="rotate(5 310 230)"/>
+      <g class="bob"><use class="hot" href="#heart" x="164" y="40" width="72" height="67"/></g>
+      <use class="hot" href="#spark" x="118" y="34" width="16" height="16"/>
+      <use class="starfill" href="#spark" x="276" y="30" width="20" height="20"/>
+      <use class="hot" href="#spark" x="196" y="10" width="12" height="12"/>
+    </svg>
+  </div>
+</section>
+
+<!-- Экран 2: место -->
+<section class="wrap" id="p2" hidden>
+  <button class="link" type="button" data-go="1">← Назад</button>
+  <svg class="mini" viewBox="0 0 400 190" aria-hidden="true">
+    <use href="#sprout" x="24" y="24" width="150" height="156" transform="rotate(-5 99 180)"/>
+    <use href="#star" x="226" y="24" width="150" height="156" transform="rotate(5 301 180)"/>
+    <ellipse class="paper ol" cx="200" cy="150" rx="36" ry="13"/>
+    <ellipse class="softfill" cx="200" cy="149" rx="23" ry="8"/>
+    <use class="hot" href="#heart" x="189" y="118" width="22" height="21"/>
+    <use class="starfill" href="#spark" x="196" y="82" width="12" height="12"/>
+  </svg>
+  <header class="hero">
+    <h1>Куда пойдём?</h1>
+    <p class="lead">Выбери одно из моих мест или предложи своё.</p>
+  </header>
+  <div class="step">
+    <div class="venues" id="venues" role="radiogroup" aria-label="Место"></div>
+    <div class="field" id="custom-wrap" hidden>
+      <label for="custom-venue">Куда ты хочешь?</label>
+      <input id="custom-venue" type="text" maxlength="80" placeholder="Название места" autocomplete="off">
+    </div>
+  </div>
+</section>
+
+<!-- Экран 3: дата и время -->
+<section class="wrap" id="p3" hidden>
+  <button class="link" type="button" data-go="2">← Назад</button>
+  <svg class="mini" viewBox="0 0 400 190" aria-hidden="true">
+    <use href="#sprout" x="24" y="24" width="150" height="156" transform="rotate(-5 99 180)"/>
+    <use href="#star" x="226" y="24" width="150" height="156" transform="rotate(5 301 180)"/>
+    <rect class="paper ol" x="168" y="70" width="64" height="72" rx="9"/>
+    <path class="hot ol" d="M168 79 a9 9 0 0 1 9 -9 h46 a9 9 0 0 1 9 9 v11 h-64z"/>
+    <path class="line" d="M184 64 v10 M216 64 v10"/>
+    <use class="hot" href="#heart" x="184" y="99" width="32" height="30"/>
+  </svg>
+  <header class="hero">
+    <h1>Когда?</h1>
+    <p class="lead">Выбери день и время, которые тебе удобны.</p>
+  </header>
+
+  <section class="step" aria-labelledby="h-when">
+    <h2 id="h-when">День</h2>
+    <p class="month" id="month-label"></p>
+    <div class="days" id="days" role="radiogroup" aria-labelledby="h-when"></div>
+  </section>
+
+  <section class="step" aria-labelledby="h-time">
+    <h2 id="h-time">Время</h2>
+    <p class="sub">День</p>
+    <div class="times" id="times-day" role="radiogroup" aria-labelledby="h-time"></div>
+    <p class="sub">Вечер</p>
+    <div class="times" id="times-eve" role="radiogroup" aria-labelledby="h-time"></div>
+  </section>
+
+  <section class="step">
+    <div class="field">
+      <label for="note">Пожелание, если есть</label>
+      <textarea id="note" maxlength="300" placeholder="Например: хочу сидеть у окна"></textarea>
+    </div>
+  </section>
+</section>
+
+<!-- Экран 4: итог -->
+<section class="wrap" id="p4" hidden>
+  <svg class="mini" viewBox="0 0 400 190" aria-hidden="true">
+    <use href="#sprout" x="24" y="24" width="150" height="156" transform="rotate(-5 99 180)"/>
+    <use href="#star" x="226" y="24" width="150" height="156" transform="rotate(5 301 180)"/>
+    <g class="bob"><use class="hot" href="#heart" x="176" y="52" width="48" height="45"/></g>
+    <use class="starfill" href="#spark" x="150" y="40" width="16" height="16"/>
+    <use class="hot" href="#spark" x="238" y="34" width="14" height="14"/>
+  </svg>
+  <header class="hero">
+    <p class="hand">ура</p>
+    <h1>Договорились</h1>
+    <p class="lead">Вот что ты выбрала. Отправь это мне сообщением, и я всё организую.</p>
+  </header>
+
+  <article class="ticket" aria-label="Выбранное свидание">
+    <div class="ticket-main">
+      <p class="eyebrow">Свидание на двоих</p>
+      <p class="t-place" id="t-place"></p>
+      <div class="t-row">
+        <div><span class="lbl">Дата</span><span class="t-val" id="t-date"></span></div>
+        <div><span class="lbl">Время</span><span class="t-val" id="t-time"></span></div>
+      </div>
+    </div>
+    <div class="ticket-stub"><p>Осталось отправить ответ мне</p></div>
+  </article>
+
+  <div class="field">
+    <label for="msg">Сообщение для меня</label>
+    <textarea id="msg" rows="4"></textarea>
+  </div>
+
+  <div class="actions">
+    <a class="btn" id="tg" href="#" target="_blank" rel="noopener">Отправить в Telegram</a>
+    <a class="btn ghost" id="wa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+    <button class="btn ghost" id="copy" type="button">Скопировать текст</button>
+  </div>
+  <p class="status" id="status" role="status"></p>
+  <p class="fine">Страница сама ничего не отправляет: ответ уходит сообщением из твоего мессенджера.</p>
+  <button class="link" type="button" data-go="3">Изменить выбор</button>
+</section>
+
+<div class="dock" id="dock" hidden>
+  <div class="dock-in">
+    <div class="dock-text" aria-live="polite">
+      <div class="dock-name" id="dock-name">Место не выбрано</div>
+      <div class="dock-when" id="dock-when"></div>
+    </div>
+    <button class="btn" id="next" type="button" disabled>Дальше</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var VENUES = [
+    { id: "v1", kind: "Идея от меня", name: "Woki Pasta" },
+    { id: "v2", kind: "Идея от меня", name: "Tashkent Plov" },
+    { id: "v3", kind: "Идея от меня", name: "Shafran" },
+    { id: "custom", kind: "Выбери сама", name: "Мой вариант", mood: "Напиши, куда хочешь именно ты" }
+  ];
+  var DAYS_AHEAD = 14;
+
+  var WD_SHORT = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
+  var WD_NOM = ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"];
+  var WD_ACC = ["воскресенье", "понедельник", "вторник", "среду", "четверг", "пятницу", "субботу"];
+  var MON_GEN = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+  var MON_NOM = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+
+  var state = { page: 1, venue: "", date: "", time: "" };
+  var dates = {};
+
+  function $(id) { return document.getElementById(id); }
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  function iso(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+
+  function makeChoice(cls, name, id, value) {
+    var label = document.createElement("label");
+    label.className = "choice " + cls;
+    var input = document.createElement("input");
+    input.type = "radio";
+    input.name = name;
+    input.id = id;
+    input.value = value;
+    var face = document.createElement("span");
+    face.className = "face";
+    label.appendChild(input);
+    label.appendChild(face);
+    return { label: label, input: input, face: face };
+  }
+
+  function span(cls, text) {
+    var s = document.createElement("span");
+    s.className = cls;
+    s.textContent = text;
+    return s;
+  }
+
+  // Навигация между экранами
+  function show(n) {
+    state.page = n;
+    for (var i = 1; i <= 4; i++) $("p" + i).hidden = i !== n;
+    $("dock").hidden = !(n === 2 || n === 3);
+    update();
+    window.scrollTo(0, 0);
+  }
+  $("start").addEventListener("click", function () { show(2); });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-go]"), function (b) {
+    b.addEventListener("click", function () { show(parseInt(b.getAttribute("data-go"), 10)); });
+  });
+
+  // Места
+  VENUES.forEach(function (v) {
+    var c = makeChoice("venue", "venue", "venue-" + v.id, v.id);
+    c.face.appendChild(span("kind", v.kind));
+    c.face.appendChild(span("vname", v.name));
+    if (v.mood) c.face.appendChild(span("vmood", v.mood));
+    c.input.addEventListener("change", function () {
+      state.venue = v.id;
+      $("custom-wrap").hidden = v.id !== "custom";
+      update();
+    });
+    $("venues").appendChild(c.label);
+  });
+  $("custom-venue").addEventListener("input", update);
+
+  // Дни
+  var today = new Date();
+  today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  var firstDay = null;
+  var lastDay = null;
+  for (var i = 0; i < DAYS_AHEAD; i++) {
+    (function (offset) {
+      var d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset);
+      var key = iso(d);
+      dates[key] = d;
+      if (!firstDay) firstDay = d;
+      lastDay = d;
+      var wd = d.getDay();
+      var cls = "day" + (wd === 0 || wd === 6 ? " we" : "") + (offset === 0 ? " today" : "");
+      var c = makeChoice(cls, "day", "day-" + key, key);
+      c.face.appendChild(span("wd", WD_SHORT[wd]));
+      c.face.appendChild(span("dn", String(d.getDate())));
+      c.input.setAttribute("aria-label", WD_NOM[wd] + ", " + d.getDate() + " " + MON_GEN[d.getMonth()] + (offset === 0 ? ", сегодня" : ""));
+      c.input.addEventListener("change", function () {
+        state.date = key;
+        update();
+      });
+      $("days").appendChild(c.label);
+    })(i);
+  }
+  var monthText = MON_NOM[firstDay.getMonth()];
+  if (lastDay.getMonth() !== firstDay.getMonth()) monthText += " — " + MON_NOM[lastDay.getMonth()];
+  $("month-label").textContent = monthText + " " + lastDay.getFullYear();
+
+  // Время: с 12:00 до 22:00 каждые полчаса
+  var timeInputs = [];
+  for (var h = 12; h <= 22; h++) {
+    [0, 30].forEach(function (m) {
+      if (h === 22 && m === 30) return;
+      var label = pad(h) + ":" + pad(m);
+      var c = makeChoice("time", "time", "time-" + pad(h) + pad(m), label);
+      c.face.textContent = label;
+      c.input.addEventListener("change", function () {
+        state.time = label;
+        update();
+      });
+      timeInputs.push({ input: c.input, minutes: h * 60 + m });
+      $(h < 17 ? "times-day" : "times-eve").appendChild(c.label);
+    });
+  }
+
+  function refreshTimes() {
+    var now = new Date();
+    var isToday = state.date === iso(now);
+    var limit = now.getHours() * 60 + now.getMinutes() + 30;
+    timeInputs.forEach(function (t) {
+      var off = isToday && t.minutes < limit;
+      t.input.disabled = off;
+      if (off && t.input.checked) {
+        t.input.checked = false;
+        state.time = "";
+      }
+    });
+  }
+
+  function venueName() {
+    if (!state.venue) return "";
+    if (state.venue === "custom") return $("custom-venue").value.trim();
+    for (var i = 0; i < VENUES.length; i++) if (VENUES[i].id === state.venue) return VENUES[i].name;
+    return "";
+  }
+
+  function dateLong() {
+    var d = dates[state.date];
+    return WD_NOM[d.getDay()] + ", " + d.getDate() + " " + MON_GEN[d.getMonth()];
+  }
+
+  function dateShort() {
+    var d = dates[state.date];
+    return WD_SHORT[d.getDay()] + ", " + d.getDate() + " " + MON_GEN[d.getMonth()];
+  }
+
+  function complete() { return !!(venueName() && state.date && state.time); }
+
+  function update() {
+    refreshTimes();
+    var name = venueName();
+    $("dock-name").textContent = name || (state.venue === "custom" ? "Напиши название места" : "Место не выбрано");
+    if (state.page === 2) {
+      $("dock-when").textContent = name ? "Дальше выберем день и время" : "Выбери вариант";
+      $("next").textContent = "Дальше";
+      $("next").disabled = !name;
+    } else {
+      var parts = [];
+      if (state.date) parts.push(dateShort());
+      if (state.time) parts.push(state.time);
+      $("dock-when").textContent = parts.length ? parts.join(" · ") : "Выбери день и время";
+      $("next").textContent = "Подтвердить";
+      $("next").disabled = !complete();
+    }
+  }
+
+  function buildMessage() {
+    var d = dates[state.date];
+    var wd = d.getDay();
+    var pre = wd === 2 ? "во" : "в";
+    var text = "Я выбрала: " + venueName() + ". Давай " + pre + " " + WD_ACC[wd] + ", " + d.getDate() + " " + MON_GEN[d.getMonth()] + ", в " + state.time + ".";
+    var note = $("note").value.trim();
+    if (note) text += " Ещё: " + note;
+    return text;
+  }
+
+  function refreshLinks() {
+    var q = encodeURIComponent($("msg").value);
+    $("tg").href = "https://t.me/share/url?url=%20&text=" + q;
+    $("wa").href = "https://wa.me/?text=" + q;
+  }
+
+  function setStatus(t) { $("status").textContent = t; }
+
+  $("next").addEventListener("click", function () {
+    if (state.page === 2) {
+      if (venueName()) show(3);
+      return;
+    }
+    if (!complete()) return;
+    $("t-place").textContent = venueName();
+    $("t-date").textContent = dateLong();
+    $("t-time").textContent = state.time;
+    $("msg").value = buildMessage();
+    refreshLinks();
+    setStatus("");
+    show(4);
+  });
+
+  $("msg").addEventListener("input", refreshLinks);
+
+  $("copy").addEventListener("click", function () {
+    var text = $("msg").value;
+    var fallback = function () {
+      $("msg").focus();
+      $("msg").select();
+      setStatus("Выдели текст и скопируй его вручную.");
+    };
+    try {
+      navigator.clipboard.writeText(text).then(function () {
+        setStatus("Текст скопирован. Вставь его в чат со мной.");
+      }, fallback);
+    } catch (e) {
+      fallback();
+    }
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>
